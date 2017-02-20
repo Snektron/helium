@@ -4,6 +4,15 @@ type Rule func(*Context) bool
 type StringConsumer func(string)
 type BoolConsumer func(bool)
 
+var WhiteSpace Rule = AnyRuneOf(SPACE, TAB, EOL, RETURN, FEED, VTAB)
+var EndOfFile Rule = Rune(EOF)
+var EndOfLine Rule = Rune(EOF)
+var Number Rule = RuneRange('0', '9')
+var Letter Rule = FirstOf(
+		RuneRange('a', 'z'),
+		RuneRange('A', 'Z'),
+		Rune('_'))
+
 func Rune(r rune) Rule {
 	return func(ctx *Context) bool {
 		if ctx.Peek() == r {
@@ -147,5 +156,21 @@ func Until(rule Rule) Rule {
 func Recursive(rule *Rule) Rule {
 	return func(ctx *Context) bool {
 		return ctx.Parse(*rule)
+	}
+}
+
+func Predicate(rule Rule, condition func(string) bool) Rule {
+	return func(ctx *Context) bool {
+		ctx.Parse(rule)
+		return condition(ctx.capture())
+	}
+}
+
+func NoFilter(rule Rule) Rule {
+	return func(ctx *Context) bool {
+		ctx.filtering = true
+		res := ctx.Parse(rule)
+		ctx.filtering = false
+		return res
 	}
 }

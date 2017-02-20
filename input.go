@@ -8,6 +8,11 @@ import (
 const (
 	EOF = -1
 	EOL = '\n'
+	TAB = '\t'
+	RETURN = '\r'
+	FEED = '\f'
+	VTAB = '\v'
+	SPACE = ' '
 )
 
 type Input interface {

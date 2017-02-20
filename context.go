@@ -84,10 +84,6 @@ func (c *Context) capture() string {
 	return string(buffer)
 }
 
-func (c *Context) Line() uint {
-	return c.state.line
-}
-
 func (c *Context) Peek() rune {
 	return c.input.Get(c.state.pos)
 }
@@ -122,11 +118,12 @@ func (c *Context) TestString(text string) bool {
 	return true
 }
 
-func (c *Context) Error() string {
+func (c *Context) Error() error {
+	errline := c.err.line + 1
 	if c.input.Get(c.err.pos) == EOF {
-		return fmt.Sprintf("%d: Unexpected end of file.", c.Line())
+		return fmt.Errorf("%d: Unexpected end of file.", errline)
 	} else {
-		return fmt.Sprintf("%d: Unexpected input near '%s'.", c.Line(), c.ErrLine())
+		return fmt.Errorf("%d: Unexpected input near '%s'.", errline, c.ErrLine())
 	} 
 }
 
