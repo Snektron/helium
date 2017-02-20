@@ -1,11 +1,9 @@
 package helium
 
 import (
-	_ "fmt"
+	"fmt"
 	"testing"
 )
-
-type test func()
 
 func TestHelium(t *testing.T) {
 	bfi, err := BufferedFileInput("test.txt")
@@ -17,16 +15,6 @@ func TestHelium(t *testing.T) {
 
 	ctx := NewContext(bfi)
 
-	var a Rule
-	var b Rule
-
-	a = Sequence(
-		Rune('a'),
-		Recursive(&b))
-
-	b = Rune('b')
-
-	/*
 	root :=
 		Sequence(
 			Capture(
@@ -37,9 +25,9 @@ func TestHelium(t *testing.T) {
 				func(text string) {
 					fmt.Printf("Captured: %q\n", text)
 				}),
-			Rune(EOF)) */
+			Rune(EOF))
 
-	result := ctx.Parse(a)
+	result := ctx.Parse(root)
 
 	if !result {
 		t.Error(ctx.Error())
