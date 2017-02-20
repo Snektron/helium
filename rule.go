@@ -70,22 +70,22 @@ func Any() Rule {
 
 func ZeroOrMore(rule Rule) Rule {
 	return func(ctx *Context) bool {
-		for ctx.parse(rule) {}
+		for ctx.Parse(rule) {}
 		return true
 	}
 }
 
 func OneOrMore(rule Rule) Rule {
 	return func(ctx *Context) bool {
-		res := ctx.parse(rule)
-		for ctx.parse(rule) {}
+		res := ctx.Parse(rule)
+		for ctx.Parse(rule) {}
 		return res
 	}
 }
 
 func Optional(rule Rule) Rule {
 	return func(ctx *Context) bool {
-		ctx.parse(rule)
+		ctx.Parse(rule)
 		return true
 	}
 }
@@ -93,7 +93,7 @@ func Optional(rule Rule) Rule {
 func Sequence(rules ...Rule) Rule {
 	return func(ctx *Context) bool {
 		for _, rule := range rules {
-			if !ctx.parse(rule) {
+			if !ctx.Parse(rule) {
 				return false
 			}
 		}
@@ -104,7 +104,7 @@ func Sequence(rules ...Rule) Rule {
 func FirstOf(rules ...Rule) Rule {
 	return func(ctx *Context) bool {
 		for _, rule := range rules {
-			if ctx.parse(rule) {
+			if ctx.Parse(rule) {
 				return true
 			}
 		}
@@ -114,7 +114,7 @@ func FirstOf(rules ...Rule) Rule {
 
 func Capture(rule Rule, consumer StringConsumer) Rule {
 	return func(ctx *Context) bool {
-		if ctx.parse(rule) {
+		if ctx.Parse(rule) {
 			consumer(ctx.capture())
 			return true
 		}
@@ -124,8 +124,28 @@ func Capture(rule Rule, consumer StringConsumer) Rule {
 
 func Action(rule Rule, consumer BoolConsumer) Rule {
 	return func(ctx *Context) bool {
-		res := ctx.parse(rule)
+		res := ctx.Parse(rule)
 		consumer(res)
 		return res
 	}	
+}
+
+func Until(rule Rule) Rule {
+	return func(ctx *Context) bool {
+		for {
+			if ctx.Peek() == EOF {
+				return false
+			}
+
+			if ctx.Parse(rule) {
+				return true
+			}
+		}
+	}
+}
+
+func Recursive(rule *Rule) Rule {
+	return func(ctx *Context) bool {
+		return ctx.Parse(*rule)
+	}
 }
